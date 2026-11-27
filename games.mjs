@@ -37,3 +37,15 @@ export function translationExercise(words, dictionary, mode) {
   return mode === 8 ? { prompt: word, answer: dictionary[word] }
     : { prompt: dictionary[word], answer: word };
 }
+
+/** Prepare text-based exercises independently of playback and rendering. */
+export function lineExercise(line, mode) {
+  if (!line.trim()) return null;
+  if (mode === 0) return { prompt: line, answer: null };
+  if (mode === 7) return { prompt: line, answer: line };
+  if (mode === 11) {
+    const words = line.trim().split(/\s+/);
+    return { prompt: words.slice(0,-1).join(' ')+' …', answer: words.at(-1) };
+  }
+  return null;
+}
