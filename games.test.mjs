@@ -14,3 +14,10 @@ import { scrambleExercise } from './games.mjs';
 test('phrase scramble preserves answer and words',()=>assert.deepEqual(scrambleExercise(['I','sing'],5,()=>0),{answer:'I sing',prompt:'sing / I'}));
 test('word scramble preserves letters',()=>assert.deepEqual(scrambleExercise(['I','sing'],6,()=>0),{answer:'sing',prompt:'i n g s'}));
 test('empty scramble is safe',()=>assert.deepEqual(scrambleExercise([],6),{answer:'',prompt:''}));
+
+import { translationExercise } from './games.mjs';
+const dictionary={light:'свет',road:'дорога'};
+test('English to Russian',()=>assert.deepEqual(translationExercise(['Light!'],dictionary,8),{prompt:'light',answer:'свет'}));
+test('Russian to English',()=>assert.deepEqual(translationExercise(['road'],dictionary,9),{prompt:'дорога',answer:'road'}));
+test('unknown words are skipped',()=>assert.equal(translationExercise(['unknown'],dictionary,8),null));
+test('inherited properties are not vocabulary',()=>assert.equal(translationExercise(['constructor'],dictionary,8),null));
