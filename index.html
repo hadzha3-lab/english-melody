@@ -1,6 +1,72 @@
-<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>English Melody</title><style>
-*{box-sizing:border-box}body{margin:0;background:#10101c;color:#f6f5ff;font:16px system-ui}header,main{max-width:1000px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center}h1{font-size:clamp(32px,6vw,58px);margin:12px 0}h2{margin-top:0}p{color:#c3bfd5;line-height:1.6}.hero{background:linear-gradient(120deg,#5036a0,#24213e);padding:32px;border-radius:24px}.panel{background:#1d1c2e;border:1px solid #39364e;border-radius:20px;padding:24px;margin-top:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}button,input,select,textarea{font:inherit;border:1px solid #57516d;border-radius:10px;padding:12px;background:#28263b;color:white}button{cursor:pointer}button:hover,button.active{background:#7655d6}input,textarea,select{max-width:100%}textarea{width:100%;min-height:110px}audio{width:100%;margin:12px 0}.line{margin:12px 0;line-height:2}.line input{width:120px}.ok{color:#83e5ad}.bad{color:#ff9b9b}small{color:#bcb5d3}a{color:#bba5ff}label{display:block;margin:10px 0}summary{cursor:pointer} </style><header><strong>♫ English Melody</strong><span id="points"></span></header><main><section class="hero"><small>АНГЛИЙСКИЙ ЧЕРЕЗ МУЗЫКУ</small><h1>Слушай. Играй. Учись.</h1><p>Тренируй английский с помощью песен и интерактивных заданий.</p></section><section class="panel"><h2>Каталог учебных песен</h2><input id="search" placeholder="Поиск по названию"><select id="level"><option value="">Все уровни</option><option>A1</option><option>A2</option><option>B1</option></select><div id="catalog" class="grid" style="margin-top:14px"></div><small>Оригинальные учебные тексты, пока без музыкальных записей.</small></section><section class="panel"><h2>Учебная композиция</h2><p id="song">Morning Light · оригинальный учебный текст</p><audio id="audio" controls hidden></audio><p id="notice">Демо пока без музыкальной записи. Можно загрузить разрешённое аудио и собственный текст ниже.</p><details><summary>Добавить свою песню</summary><label>Название <input id="name"></label><label>Аудиофайл <input id="file" type="file" accept="audio/*"></label><label>Текст песни (одна строка на строку)<textarea id="lyrics"></textarea></label><button id="load">Загрузить для текущего сеанса</button></details></section><section class="panel"><h2>Выбери игру</h2><div class="grid" id="modes"></div></section><section class="panel"><h2 id="heading"></h2><div id="game"></div><button id="check">Проверить</button> <button id="reset">Начать заново</button><p id="result" role="status"></p></section><section class="panel"><h2>Мой прогресс</h2><div id="history"></div><button id="clearHistory">Очистить историю</button></section></main><script type="module">
-import { isCorrect } from "./scoring.mjs";
-const $=id=>document.getElementById(id);let lines=['I see the morning light','I walk along the road','I feel the wind tonight','Music makes me feel free'];let mode=0,answers=[],earned=false;const modes=['Караоке','Викторина','Beginner','Intermediate','Expert','Собери фразу','Собери слово','Диктант (озвучка)','Угадай перевод','Найди пару','Игра на время','Слово за словом'];let total=0;let history=[];try{history=JSON.parse(localStorage.getItem('melodyHistory')||'[]')}catch{};let started=0;const dict={light:'свет',road:'дорога',wind:'ветер',free:'свободный',sky:'небо',day:'день',home:'дом',dream:'мечта',rain:'дождь',heart:'сердце',night:'ночь',song:'песня'};try{total=Number(localStorage.getItem('melodyPoints')||0)}catch{}function points(){$('points').textContent='★ '+total+' баллов'}points();function el(tag,txt){let e=document.createElement(tag);if(txt!==undefined)e.textContent=txt;return e}function shuffle(a){return [...a].sort(()=>Math.random()-.5)}function render(){started=Date.now();earned=false;answers=[];$('result').textContent='';$('heading').textContent=modes[mode];$('game').replaceChildren();$('check').hidden=mode===0;[...$('modes').children].forEach((b,i)=>b.classList.toggle('active',i===mode));lines.forEach((line,i)=>{let row=el('div');row.className='line';let words=line.trim().split(/\s+/);if(mode===7){let b=el('button','▶ Прослушать фразу');b.onclick=()=>{if(!window.speechSynthesis){$('result').textContent='Озвучка недоступна';return}let u=new SpeechSynthesisUtterance(line);u.lang='en-US';speechSynthesis.cancel();speechSynthesis.speak(u)};let input=el('input');input.placeholder='Введите фразу';row.append(b,input);answers.push([input,line])}else if(mode===8||mode===9){let w=words.map(x=>x.toLowerCase().replace(/[^a-z]/g,'')).find(x=>dict[x]);if(!w)return;let input=el('select');input.append(new Option('Выбери',''));let options=mode===8?Object.values(dict):Object.keys(dict);let target=mode===8?dict[w]:w;row.append(el('span',(mode===8?w:dict[w])+' — '));shuffle([target,...shuffle(options.filter(x=>x!==target)).slice(0,3)]).forEach(x=>input.append(new Option(x,x)));row.append(input);answers.push([input,target])}else if(mode===11){let input=el('input');row.append(el('div',words.slice(0,-1).join(' ')+' …'),input);answers.push([input,words.at(-1)])}else if(mode===0){row.textContent=line}else if(mode===5||mode===6){let target=mode===5?words.join(' '):words[words.length-1];row.append(el('div',mode===5?shuffle(words).join(' / '):shuffle([...target]).join(' ')));let input=el('input');input.placeholder='Ответ';row.append(input);answers.push([input,target])}else{let indices=mode===4||mode===10?words.map((_,j)=>j).filter(j=>j%2===1):[words.length-1];words.forEach((w,j)=>{if(!indices.includes(j)){row.append(document.createTextNode(w+' '));return}let input;if(mode<=2){input=el('select');input.append(new Option('Выбери',''));let pool=[...new Set([w,...shuffle(lines.flatMap(l=>l.split(/\s+/))).filter(x=>x.toLowerCase()!==w.toLowerCase()).slice(0,3)])];shuffle(pool).forEach(x=>input.append(new Option(x,x)))}else{input=el('input');input.placeholder=mode===3?w[0]+'…':'…'}row.append(input,document.createTextNode(' '));answers.push([input,w])})}$('game').append(row)})}modes.forEach((m,i)=>{let b=el('button',m);b.onclick=()=>{mode=i;render()};$('modes').append(b)});$('reset').onclick=render;$('check').onclick=()=>{let n=0;answers.forEach(([e,w])=>{let ok=isCorrect(e.value,w);e.style.borderColor=ok?'#83e5ad':'#ff9b9b';if(ok)n++});$('result').textContent='Правильно: '+n+' из '+answers.length+(mode===10?' · Время: '+Math.round((Date.now()-started)/1000)+' сек.':'');if(!answers.length){$('result').textContent='Для этой песни нет слов в учебном словаре.';return}if(!earned){history.unshift({song:$('song').textContent,mode:modes[mode],score:n+'/'+answers.length});history=history.slice(0,50);try{localStorage.setItem('melodyHistory',JSON.stringify(history))}catch{}showHistory()}if(!earned&&n===answers.length&&n){total+=n*10;earned=true;try{localStorage.setItem('melodyPoints',total)}catch{}points()}};$('load').onclick=()=>{let l=$('lyrics').value.split(/\n/).map(x=>x.trim()).filter(Boolean);if(!l.length){$('notice').textContent='Введите текст песни.';return}lines=l;$('song').textContent=$('name').value||'Моя песня';let f=$('file').files[0];if(f){$('audio').src=URL.createObjectURL(f);$('audio').hidden=false;$('notice').textContent='Аудио загружено локально.'}else{$('audio').removeAttribute('src');$('audio').hidden=true;$('notice').textContent='Текст загружен без аудио.'}render()};render();
-const songs=[{name:'Morning Light',level:'A1',lines:['I see the morning light','I walk along the road','I feel the wind tonight','Music makes me feel free']},{name:'Blue Sky',level:'A2',lines:['I look up at the sky','I welcome every day','I know the road to home','I follow my own dream']},{name:'After the Rain',level:'B1',lines:['I hear the sound of rain','I keep hope inside my heart','I find a light within the night','I carry on and sing my song']}];function catalog(){let q=$('search').value.toLowerCase();$('catalog').replaceChildren();songs.filter(s=>s.name.toLowerCase().includes(q)&&(!$('level').value||s.level===$('level').value)).forEach(s=>{let b=el('button',s.name+' · '+s.level);b.onclick=()=>{lines=s.lines;$('song').textContent=s.name+' · учебный текст';$('audio').pause();$('audio').removeAttribute('src');$('audio').hidden=true;$('notice').textContent='Музыкальная запись пока не добавлена.';render()};$('catalog').append(b)})}$('search').oninput=catalog;$('level').onchange=catalog;catalog();function showHistory(){$('history').replaceChildren();if(!history.length)$('history').append(el('p','Пока нет результатов'));history.forEach(h=>$('history').append(el('p',h.song+' · '+h.mode+' · '+h.score)))}$('clearHistory').onclick=()=>{history=[];try{localStorage.removeItem('melodyHistory')}catch{}showHistory()};showHistory();
-</script></html>
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Melody</title>
+<link rel="stylesheet" href="./styles.css">
+<header>
+<strong>♫ English Melody</strong>
+<span id="points">
+</span>
+</header>
+<main>
+<section class="hero">
+<small>АНГЛИЙСКИЙ ЧЕРЕЗ МУЗЫКУ</small>
+<h1>Слушай. Играй. Учись.</h1>
+<p>Тренируй английский с помощью песен и интерактивных заданий.</p>
+</section>
+<section class="panel">
+<h2>Каталог учебных песен</h2>
+<input id="search" placeholder="Поиск по названию">
+<select id="level">
+<option value="">Все уровни</option>
+<option>A1</option>
+<option>A2</option>
+<option>B1</option>
+</select>
+<div id="catalog" class="grid" style="margin-top:14px">
+</div>
+<small>Оригинальные учебные тексты, пока без музыкальных записей.</small>
+</section>
+<section class="panel">
+<h2>Учебная композиция</h2>
+<p id="song">Morning Light · оригинальный учебный текст</p>
+<audio id="audio" controls hidden>
+</audio>
+<p id="notice">Демо пока без музыкальной записи. Можно загрузить разрешённое аудио и собственный текст ниже.</p>
+<details>
+<summary>Добавить свою песню</summary>
+<label>Название <input id="name">
+</label>
+<label>Аудиофайл <input id="file" type="file" accept="audio/*">
+</label>
+<label>Текст песни (одна строка на строку)<textarea id="lyrics">
+</textarea>
+</label>
+<button id="load">Загрузить для текущего сеанса</button>
+</details>
+</section>
+<section class="panel">
+<h2>Выбери игру</h2>
+<div class="grid" id="modes">
+</div>
+</section>
+<section class="panel">
+<h2 id="heading">
+</h2>
+<div id="game">
+</div>
+<button id="check">Проверить</button> <button id="reset">Начать заново</button>
+<p id="result" role="status">
+</p>
+</section>
+<section class="panel">
+<h2>Мой прогресс</h2>
+<div id="history">
+</div>
+<button id="clearHistory">Очистить историю</button>
+</section>
+</main>
+<script type="module" src="./app.mjs">
+</script>
+</html>
