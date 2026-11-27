@@ -12,4 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test
+      - name: Check JavaScript syntax
+        run: |
+          for file in *.mjs; do node --check "$file" || exit 1; done
+      - name: Run unit tests
+        run: node --test
