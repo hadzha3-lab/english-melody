@@ -16,4 +16,15 @@ jobs:
         run: |
           for file in *.mjs; do node --check "$file" || exit 1; done
       - name: Run unit tests
-        run: node --test
+        run: node --test *.test.mjs
+      - name: Install browser test runner
+        run: |
+          npm install --no-save @playwright/test@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Run browser tests
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8000/ >/dev/null && break; sleep 1; done
+          npx playwright test browser/smoke.spec.cjs
