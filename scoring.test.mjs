@@ -1,0 +1,9 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { normalize, score } from './scoring.mjs';
+test('ignores case and surrounding whitespace',()=>assert.equal(normalize('  LIGHT '),'light'));
+test('normalizes repeated spaces and punctuation',()=>assert.equal(normalize('I  sing!'),'i sing'));
+test('preserves apostrophes',()=>assert.notEqual(normalize("don't"),normalize('dont')));
+test('counts correct and incorrect answers',()=>assert.deepEqual(score(['LIGHT','wrong'],['light','road']),{correct:1,total:2}));
+test('empty answers never count',()=>assert.deepEqual(score([''],['']),{correct:0,total:1}));
+test('rejects mismatched arrays',()=>assert.throws(()=>score([],['a']),RangeError));
