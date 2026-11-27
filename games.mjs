@@ -28,3 +28,12 @@ export function scrambleExercise(words, mode, random = Math.random) {
   const prompt = mode === 5 ? shuffle(words, random).join(' / ') : shuffle([...answer], random).join(' ');
   return { answer, prompt };
 }
+
+/** Find a known word and prepare the requested translation direction. */
+export function translationExercise(words, dictionary, mode) {
+  const word = words.map(value => value.toLowerCase().replace(/[^a-z]/g, ''))
+    .find(value => Object.hasOwn(dictionary, value));
+  if (!word) return null;
+  return mode === 8 ? { prompt: word, answer: dictionary[word] }
+    : { prompt: dictionary[word], answer: word };
+}
