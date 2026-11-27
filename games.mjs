@@ -21,3 +21,10 @@ export function answerOptions(correct, vocabulary, random = Math.random) {
   }
   return shuffle(choices, random);
 }
+
+/** Prepare a phrase or word scramble without depending on the DOM. */
+export function scrambleExercise(words, mode, random = Math.random) {
+  const answer = mode === 5 ? words.join(' ') : (words.at(-1) ?? '');
+  const prompt = mode === 5 ? shuffle(words, random).join(' / ') : shuffle([...answer], random).join(' ');
+  return { answer, prompt };
+}
