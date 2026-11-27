@@ -7,3 +7,4 @@ test('preserves apostrophes',()=>assert.notEqual(normalize("don't"),normalize('d
 test('counts correct and incorrect answers',()=>assert.deepEqual(score(['LIGHT','wrong'],['light','road']),{correct:1,total:2}));
 test('empty answers never count',()=>assert.deepEqual(score([''],['']),{correct:0,total:1}));
 test('rejects mismatched arrays',()=>assert.throws(()=>score([],['a']),RangeError));
+test('rejects non-string answers',()=>assert.deepEqual(score([123],['123']),{correct:0,total:1}));
