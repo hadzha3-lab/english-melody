@@ -21,3 +21,9 @@ test('English to Russian',()=>assert.deepEqual(translationExercise(['Light!'],di
 test('Russian to English',()=>assert.deepEqual(translationExercise(['road'],dictionary,9),{prompt:'дорога',answer:'road'}));
 test('unknown words are skipped',()=>assert.equal(translationExercise(['unknown'],dictionary,8),null));
 test('inherited properties are not vocabulary',()=>assert.equal(translationExercise(['constructor'],dictionary,8),null));
+
+import { lineExercise } from './games.mjs';
+test('karaoke preserves text',()=>assert.deepEqual(lineExercise('I sing',0),{prompt:'I sing',answer:null}));
+test('dictation preserves expected phrase',()=>assert.deepEqual(lineExercise('I sing',7),{prompt:'I sing',answer:'I sing'}));
+test('last word exercise hides answer',()=>assert.deepEqual(lineExercise('I sing',11),{prompt:'I …',answer:'sing'}));
+test('empty line is safe',()=>assert.equal(lineExercise('  ',11),null));
