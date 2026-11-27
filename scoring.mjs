@@ -5,6 +5,7 @@ export function normalize(value) {
 }
 
 export function isCorrect(answer, expected) {
+  if (typeof answer !== "string" || typeof expected !== "string") return false;
   const normalized = normalize(answer);
   return normalized !== '' && normalized === normalize(expected);
 }
