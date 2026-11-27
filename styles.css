@@ -1,0 +1,26 @@
+
+*{box-sizing:border-box}
+body{margin:0;background:#10101c;color:#f6f5ff;font:16px system-ui}
+header,main{max-width:1000px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:clamp(32px,6vw,58px);margin:12px 0}
+h2{margin-top:0}
+p{color:#c3bfd5;line-height:1.6}
+.hero{background:linear-gradient(120deg,#5036a0,#24213e);padding:32px;border-radius:24px}
+.panel{background:#1d1c2e;border:1px solid #39364e;border-radius:20px;padding:24px;margin-top:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+button,input,select,textarea{font:inherit;border:1px solid #57516d;border-radius:10px;padding:12px;background:#28263b;color:white}
+button{cursor:pointer}
+button:hover,button.active{background:#7655d6}
+input,textarea,select{max-width:100%}
+textarea{width:100%;min-height:110px}
+audio{width:100%;margin:12px 0}
+.line{margin:12px 0;line-height:2}
+.line input{width:120px}
+.ok{color:#83e5ad}
+.bad{color:#ff9b9b}
+small{color:#bcb5d3}
+a{color:#bba5ff}
+label{display:block;margin:10px 0}
+summary{cursor:pointer}
+ 
