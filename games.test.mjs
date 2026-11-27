@@ -9,3 +9,8 @@ test('single word basic exercise',()=>assert.deepEqual(gapIndices(['a'],2),[0]))
 import { answerOptions } from './games.mjs';
 test('options contain correct answer and no case duplicates',()=>{const options=answerOptions('Light',['light','ROAD','road','wind','sky'],()=>0);assert.equal(options.length,4);assert.equal(new Set(options.map(x=>x.toLowerCase())).size,4);assert.ok(options.includes('Light'))});
 test('small vocabulary does not invent answers',()=>assert.deepEqual(answerOptions('light',['LIGHT'],()=>0),['light']));
+
+import { scrambleExercise } from './games.mjs';
+test('phrase scramble preserves answer and words',()=>assert.deepEqual(scrambleExercise(['I','sing'],5,()=>0),{answer:'I sing',prompt:'sing / I'}));
+test('word scramble preserves letters',()=>assert.deepEqual(scrambleExercise(['I','sing'],6,()=>0),{answer:'sing',prompt:'i n g s'}));
+test('empty scramble is safe',()=>assert.deepEqual(scrambleExercise([],6),{answer:'',prompt:''}));
